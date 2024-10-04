@@ -1,6 +1,7 @@
 import axios, { AxiosResponse, AxiosError } from "axios";
 import { Target, Todo } from "../../types/types";
 
+// Configurando API
 const api = axios.create({
   baseURL: "https://todo-caio.azurewebsites.net",
   headers: {
@@ -8,7 +9,7 @@ const api = axios.create({
   },
 });
 
-// Func  para tratar erros
+// Func para tratar erros
 const handleError = (error: AxiosError): void => {
   if (error.response) {
     console.error("Erro na requisição:", error.response.data);
@@ -20,26 +21,12 @@ const handleError = (error: AxiosError): void => {
   throw error;
 };
 
-// GET: Pegar todos os Targets
-export const getTargets = async (): Promise<Target[] | undefined> => {
+// Função auxiliar para requisições com tratamento de erro
+const handleRequest = async <T>(
+  request: () => Promise<AxiosResponse<T>>
+): Promise<T | undefined> => {
   try {
-    const response: AxiosResponse<Target[]> = await api.get("/api/Targets");
-    return response.data;
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-    return undefined;
-  }
-};
-
-// POST: Criar um novo Target
-export const createTarget = async (
-  target: Omit<Target, "id">
-): Promise<Target | undefined> => {
-  try {
-    const response: AxiosResponse<Target> = await api.post(
-      "/api/Targets",
-      target
-    );
+    const response = await request();
     return response.data;
   } catch (error) {
     handleError(error as AxiosError);
@@ -47,80 +34,56 @@ export const createTarget = async (
   }
 };
 
-// PUT: Atualizar um Target existente
+// GET: All Targets
+export const getTargets = async (): Promise<Target[] | undefined> => {
+  return handleRequest(() => api.get("/api/Targets"));
+};
+
+//SOCORROOOOOOOOOO - caiu enviando payload para o servidor
+export const createTarget = async (
+  target: Omit<Target, "id">
+): Promise<Target | undefined> => {
+  console.log("Enviando payload para o servidor:", target);
+
+  try {
+    const response = await api.post("/api/Targets", target);
+    console.log("Resposta do servidor:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Erro ao criar target:", error);
+    return undefined;
+  }
+};
+
 export const updateTarget = async (
   id: number,
   target: Omit<Target, "id">
 ): Promise<Target | undefined> => {
-  try {
-    const response: AxiosResponse<Target> = await api.put(
-      `/api/Targets/${id}`, // Certifique-se de que a URL está correta e aceita o ID no parâmetro
-      target
-    );
-    return response.data;
-  } catch (error) {
-    handleError(error as AxiosError);
-    return undefined;
-  }
+  return handleRequest(() => api.put(`/api/Targets/${id}`, target));
 };
 
-// DELETE: Deletar um Target existente
 export const deleteTarget = async (id: number): Promise<void> => {
-  try {
-    await api.delete(`/api/Targets/${id}`);
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-  }
+  await handleRequest(() => api.delete(`/api/Targets/${id}`));
 };
 
-// Funções para Todos
-
-// GET: Pegar todos os Todos
+// GET: All todos os Todos
 export const getTodos = async (): Promise<Todo[] | undefined> => {
-  try {
-    const response: AxiosResponse<Todo[]> = await api.get("/api/Todo");
-    return response.data;
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-    return undefined;
-  }
+  return handleRequest(() => api.get("/api/Todo"));
 };
 
-// POST: Criar um novo Todo
 export const createTodo = async (
   todo: Omit<Todo, "id">
 ): Promise<Todo | undefined> => {
-  try {
-    const response: AxiosResponse<Todo> = await api.post("/api/Todo", todo);
-    return response.data;
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-    return undefined;
-  }
+  return handleRequest(() => api.post("/api/Todo", todo));
 };
 
-// PUT: Atualizar um Todo existente
 export const updateTodo = async (
   id: number,
   todo: Omit<Todo, "id">
 ): Promise<Todo | undefined> => {
-  try {
-    const response: AxiosResponse<Todo> = await api.put(
-      `/api/Todo/${id}`,
-      todo
-    );
-    return response.data;
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-    return undefined;
-  }
+  return handleRequest(() => api.put(`/api/Todo/${id}`, todo));
 };
 
-// DELETE: Deletar um Todo existente
 export const deleteTodo = async (id: number): Promise<void> => {
-  try {
-    await api.delete(`/api/Todo/${id}`);
-  } catch (error) {
-    handleError(error as AxiosError); // Tipagem explícita
-  }
+  await handleRequest(() => api.delete(`/api/Todo/${id}`));
 };
