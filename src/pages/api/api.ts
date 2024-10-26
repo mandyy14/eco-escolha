@@ -39,46 +39,33 @@ export const getTargets = async (): Promise<Target[] | undefined> => {
   return handleRequest(() => api.get("/api/Targets"));
 };
 
-//SOCORROOOOOOOOOO - debugando
 export const createTarget = async (
   target: Omit<Target, "id">
 ): Promise<Target | undefined> => {
-  // Certifique-se de que o campo 'todo' tem os valores necessários
-  const targetWithTodo = {
+  const targetPayload = {
     ...target,
-    id: 0, // Ao criar um novo target, o id deve ser 0
-    todo: [
-      {
-        id: 0, // Ao criar um novo TODO, o id deve ser 0
-        title: target.title || "Default Title", // Certifique-se de que há um título
-        isComplete: target.isComplete || false, // Defina como false se não tiver valor
-        description: target.description || "Default description", // Preencha uma descrição padrão
-        targetId: 0, // Isso será preenchido pelo servidor
-      },
-    ],
+    todo: target.todo ?? [], // Inicializa `todo` como array vazio se estiver indefinido
   };
 
-  console.log("Enviando payload para o servidor:", targetWithTodo); // Verifique o payload
+  console.log("Payload de criação:", targetPayload);
 
-  try {
-    const response = await api.post("/api/Targets", targetWithTodo);
-    console.log("Resposta do servidor:", response.data); // Verifique a resposta do servidor
-    return response.data;
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      console.error("Erro ao criar target - Detalhes:", error.response?.data); // Verifique o erro
-    } else {
-      console.error("Erro desconhecido:", error);
-    }
-    return undefined;
-  }
+  return handleRequest(() => api.post("/api/Targets", targetPayload));
 };
 
 export const updateTarget = async (
   id: number,
   target: Omit<Target, "id">
 ): Promise<Target | undefined> => {
-  return handleRequest(() => api.put(`/api/Targets/${id}`, target));
+  const updatePayload = {
+    title: target.title ?? "",
+    isComplete: target.isComplete,
+    description: target.description ?? "",
+    todo: target.todo ?? [],
+  };
+
+  console.log("Payload de atualização:", updatePayload);
+
+  return handleRequest(() => api.put(`/api/Targets/${id}`, updatePayload));
 };
 
 export const deleteTarget = async (id: number): Promise<void> => {
@@ -93,14 +80,22 @@ export const getTodos = async (): Promise<Todo[] | undefined> => {
 export const createTodo = async (
   todo: Omit<Todo, "id">
 ): Promise<Todo | undefined> => {
-  return handleRequest(() => api.post("/api/Todo", todo));
+  const todoPayload = { ...todo };
+
+  console.log("Payload de criação de Todo:", todoPayload);
+
+  return handleRequest(() => api.post("/api/Todo", todoPayload));
 };
 
 export const updateTodo = async (
   id: number,
   todo: Omit<Todo, "id">
 ): Promise<Todo | undefined> => {
-  return handleRequest(() => api.put(`/api/Todo/${id}`, todo));
+  const updatePayload = { ...todo };
+
+  console.log("Payload de atualização de Todo:", updatePayload);
+
+  return handleRequest(() => api.put(`/api/Todo/${id}`, updatePayload));
 };
 
 export const deleteTodo = async (id: number): Promise<void> => {

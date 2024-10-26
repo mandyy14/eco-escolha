@@ -1,6 +1,6 @@
 export interface Target {
   id: number;
-  title?: string;
+  title?: string; // ? hum é opcional
   isComplete: boolean;
   description?: string;
   todo?: Todo[];
